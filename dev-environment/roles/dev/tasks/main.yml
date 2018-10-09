@@ -1,0 +1,20 @@
+---  
+- name: Install basic dev packages
+  yum:
+    name: "{{ packages }}"
+    state: present
+  become: true
+  vars:
+    packages:
+    - gcc
+    - kernel-devel 
+    - kernel-headers 
+    - dkms 
+    - make 
+    - cmake
+    - bzip2 
+    - perl 
+    - git
+    - openssl-devel
+    - zip
+    - unzip
