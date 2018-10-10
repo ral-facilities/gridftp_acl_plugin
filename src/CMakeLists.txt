@@ -1,10 +1,9 @@
 cmake_minimum_required (VERSION 2.8.8)
-enable_testing()
 
 # ----------- GET TEST DEPENDENCIES -------------
 
 # Get google test dependencies
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+configure_file(dependencies/gtest.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/googletest-download" )
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
@@ -19,7 +18,16 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # and gmock_main
 add_subdirectory("${CMAKE_BINARY_DIR}/googletest-src"
                  "${CMAKE_BINARY_DIR}/googletest-build")
-                 
+
+# ------------- SPD log dependency -------------------
+configure_file(dependencies/spdlog.in spdlog-download/CMakeLists.txt)
+execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/spdlog-download" )
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/spdlog-download" )
+
+add_subdirectory("${CMAKE_BINARY_DIR}/spdlog-src"
+                 "${CMAKE_BINARY_DIR}/spdlog-build")
 
 # --------- MAIN APPLICATION -----------
 project (GridftpACLPlugin)
@@ -28,15 +36,16 @@ project (GridftpACLPlugin)
 set (GridftpACLPlugin_VERSION_MAJOR 1)
 set (GridftpACLPlugin_VERSION_MINOR 0)
 
-#include the subdirectory containing our libs
-#add_subdirectory (Hello)
-#include_directories(Hello)
+#include the application source files
+include_directories(framework framework/logger)
+
+file(GLOB_RECURSE framework_src "framework/**/*.h" "framework/**/*.cpp")
 
 #indicate the entry point for the executable
-add_executable (GridftpACLPlugin main.cpp)
+add_executable (GridftpACLPlugin main.cpp ${framework_src})
 
 # Indicate which libraries to include during the link process.
-target_link_libraries (GridftpACLPlugin)
+target_link_libraries (GridftpACLPlugin spdlog)
 
 install (TARGETS GridftpACLPlugin DESTINATION bin)
 

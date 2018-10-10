@@ -7,11 +7,9 @@ target_link_libraries(testPlugin
     gmock
 )
 
-add_test(NAME testPlugin COMMAND testPlugin)
-
 install(TARGETS testPlugin DESTINATION bin)
 
-# add_custom_target(
-#   NAME test
-#   COMMAND testPlugin
-# )
+add_custom_target(
+  test
+  COMMAND testPlugin "--gtest_color=yes"
+)
