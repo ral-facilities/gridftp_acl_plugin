@@ -36,3 +36,13 @@
     name: devtoolset-6
     state: present
   become: true
+
+- name: Install static analysis tools
+  yum:
+    name: "{{ packages }}"
+    state: present
+  become: true
+  vars:
+    packages:
+    - cppcheck
+    - lcov
