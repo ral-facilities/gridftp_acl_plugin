@@ -1,0 +1,33 @@
+---
+- name: Check if globus toolkit installed with stat
+  stat:
+    path: /usr/bin/globus-version
+  register: globus_stat
+
+- name: Download globus toolkit
+  get_url:
+    url: http://www.globus.org/ftppub/gt6/installers/repo/globus-toolkit-repo-latest.noarch.rpm
+    dest: /tmp/globus-toolkit.rpm
+    validate_certs: false
+  become: true
+  when: globus_stat.stat.exists == False
+
+- name: Install globus toolkit
+  yum:
+    name: /tmp/globus-toolkit.rpm
+    state: present
+  become: true
+  when: globus_stat.stat.exists == False
+
+- name: Install globus toolkit additions and gridFTP server
+  yum:
+    name: "{{ packages }}"
+    state: present
+  become: true
+  when: globus_stat.stat.exists == False
+  vars:
+    packages:
+    - globus-data-management-client
+    - globus-gridftp-server
+    - globus-gridftp-server-progs
+
