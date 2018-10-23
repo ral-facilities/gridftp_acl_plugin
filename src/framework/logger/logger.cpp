@@ -7,7 +7,7 @@ void Logger::Init(string logFileLocation, string logLevel)
     const auto rotatingFileSize = 10 * 1024 * 1024;
     const auto numberOfFiles = 3;
     logger = spdlog::rotating_logger_mt("gridftp_acl_plugin_logger", logFiles, rotatingFileSize, numberOfFiles);
-    spdlog::set_pattern("[%H:%M:%S %z] [%l] %v ");
+    spdlog::set_pattern("[%Y-%m-%d %H:%M:%S %z] [%l] %v ");
 
     // Setup up log level map
     logLevelMap["TRACE"] = spdlog::level::level_enum::trace;
