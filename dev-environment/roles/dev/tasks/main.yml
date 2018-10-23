@@ -20,7 +20,6 @@
     - unzip
 
 - include: ninja.yml
-- include: globus.yml
 
 - name: Install Software Collections
   yum:

@@ -1,0 +1,24 @@
+---
+- name: Install globus libraries
+  yum:
+    name: "{{ packages }}"
+    state: present
+  become: true
+  vars:
+    packages:
+    - globus-common
+    - globus-common-devel
+    - globus-ftp-client
+    - globus-ftp-client-devel
+    - globus-ftp-control
+    - globus-ftp-control-devel
+    - globus-gass-copy-progs
+    - globus-gridftp-server
+    - globus-gridftp-server-progs
+
+- name: Install myproxy
+  yum:
+    name: myproxy
+    state: present
+  become: true
+
