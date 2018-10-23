@@ -15,6 +15,7 @@
     - globus-gass-copy-progs
     - globus-gridftp-server
     - globus-gridftp-server-progs
+    - globus-gridftp-server-devel
 
 - name: Install myproxy
   yum:
