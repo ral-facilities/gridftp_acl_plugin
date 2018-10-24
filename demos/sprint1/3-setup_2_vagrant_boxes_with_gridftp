@@ -1,0 +1,25 @@
+Instructions reference https://github.com/ral-facilities/gridftp_acl_plugin/wiki/Set-up-a-gridFTP-server
+
+Run a gridFTP server
+1. modify Vagrant file to setup 2 vagrant boxes
+2. provision these boxes with globus-toolkit (contains gridFTP server)
+3. "vagrant up" your boxes to start the vms
+4. run "vagrant global-status" to check they are running
+5. log in to one of your vagrant boxes 
+   vagrant ssh machine1
+6. start a gridFTP server in anonymous mode
+   globus-grdiftp-server -control-interface 127.0.0.1 -p 5000 -aa &
+7. use globus tools to list the files present on the ftp server 
+   globus-url-copy -list ftp://127.0.0.1:5000/tmp/
+8. copy a file using the gridftp server
+   - create a test file 
+     echo "test test test" > ~/test.txt
+   - copy this file to /tmp/
+     globus-url-copy -v file:///home/${USER}/test.txt ftp://127.0.0.1:5000/tmp/mytestfile.txt
+   verify copy to /tmp/ is successful
+
+Load a bespoke dsi into your server (log in to server 2)
+1. set the LD_LIBRARY_PATH variable to include the path to your built plugin
+   LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/vagrant/src/build
+2. run the gridftp server loaded with the dsi
+   globus-grdftp-server -control-interface 127.0.0.1 -p 5000 -aa -dsi permissions_plugin
