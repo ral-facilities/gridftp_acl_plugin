@@ -62,6 +62,9 @@ add_executable (GridftpACLPlugin main.cpp ${framework_src})
 target_link_libraries (GridftpACLPlugin spdlog)
 target_link_libraries (globus_gridftp_server_permissions_plugin spdlog)
 
+set_target_properties (globus_gridftp_server_permissions_plugin PROPERTIES
+  LINK_FLAGS "${GLOBUS_FTPLIB}")
+
 install (TARGETS GridftpACLPlugin DESTINATION bin)
 
 
