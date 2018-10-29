@@ -1,0 +1,6 @@
+{{host ip addresses, note you may want to split these into groups too}}
+
+
+[all:vars]
+ansible_connection=ssh
+ansible_user={{openstack username, usually your fedID}}

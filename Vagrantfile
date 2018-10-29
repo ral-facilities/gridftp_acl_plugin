@@ -5,6 +5,7 @@ Vagrant.configure("2") do |config|
     machine1.vm.box = "gugek/scientific-linux-7"
     machine1.vm.box_version = "7.2.0"
     machine1.vm.synced_folder "src", "/home/vagrant/src"
+    machine1.vm.synced_folder "dev-environment", "/home/vagrant/playbooks"
     machine1.vm.network :private_network, ip: "172.28.128.150"
       machine1.vm.hostname = "server1"
     machine1.vm.provider "virtualbox" do |vb|
