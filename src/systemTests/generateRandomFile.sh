@@ -1,1 +1,0 @@
-dd bs=1M count=$2 < /dev/urandom > $1
