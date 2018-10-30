@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+#include "./framework/logger/logger.h"
 
 extern "C"
 {
@@ -15,6 +16,8 @@ extern "C"
     0 /* branch ID */
   };
 
+  static Logger logger;
+
   typedef struct globus_l_gfs_permissions_plugin_handle_s
   {
     int                                 some_needed_data;
@@ -22,15 +25,15 @@ extern "C"
 
 
   // Most functions will be populated from the underlying 'file' DSI
-  static globus_gfs_storage_iface_t osg_dsi_iface;
+  static globus_gfs_storage_iface_t permissions_plugin_dsi_iface;
 
-  static globus_extension_handle_t osg_dsi_handle = NULL;
+  static globus_extension_handle_t permissions_plugin_dsi_handle = NULL;
 
   static globus_gfs_storage_command_t original_command_function = NULL;
   static globus_gfs_storage_init_t original_init_function = NULL;
 
   enum {
-    GLOBUS_GFS_OSG_CMD_SITE_USAGE = GLOBUS_GFS_MIN_CUSTOM_CMD,
+    GLOBUS_GFS_CMD_SITE_GETPERMISSIONS = GLOBUS_GFS_MIN_CUSTOM_CMD,
   };
 
 
@@ -61,21 +64,20 @@ extern "C"
       // globus_gfs_finished_info_t          finished_info;
       GlobusGFSName(globus_l_gfs_permissions_plugin_start);
 
-      std::cout << "starting session\n";
-      std::cout << GLOBUS_GFS_OSG_CMD_SITE_USAGE << "\n";
+      logger.LogTrace("starting permissions plugin session");
 
-      globus_result_t result = globus_gridftp_server_add_command(op, "SITE USAGE",
-                                  GLOBUS_GFS_OSG_CMD_SITE_USAGE,
+      globus_result_t result = globus_gridftp_server_add_command(op, "SITE GETPERMISSIONS",
+                                  GLOBUS_GFS_CMD_SITE_GETPERMISSIONS,
                                   3,
-                                  5,
-                                  "SITE USAGE <sp> [TOKEN <sp> $name] <sp> $location: Get usage information for a location.",
+                                  3,
+                                  "SITE GETPERMISSIONS <sp> $location: Get permission information for a location.",
                                   GLOBUS_TRUE,
                                   GFS_ACL_ACTION_LOOKUP);
 
-      std::cout << "registered command\n";
+      logger.LogTrace("registered SITE GETPERMISSIONS command");
       if (result != GLOBUS_SUCCESS)
       {
-          std::cout << "Failed to add custom 'SITE USAGE' command\n";
+          std::cout << "Failed to add custom 'SITE GETPERMISSIONS' command\n";
           globus_gridftp_server_finished_session_start(op,
                                                   result,
                                                   NULL,
@@ -84,7 +86,7 @@ extern "C"
           return;
       }
 
-      std::cout << "passing through to original start function\n";
+      logger.LogTrace("passing through to original start function");
 
       original_init_function(op, session_info);
   }
@@ -105,6 +107,7 @@ extern "C"
 
       permissions_plugin_handle = (globus_l_gfs_permissions_plugin_handle_t *) user_arg;
 
+      logger.LogTrace("stopping permissions plugin session");
       globus_free(permissions_plugin_handle);
   }
 
@@ -173,20 +176,20 @@ extern "C"
       globus_gfs_command_info_t *         cmd_info,
       void *                              user_arg)
   {
-      std::cout << "Calling command function\n";
+      logger.LogTrace("Calling command function with command " + std::to_string(cmd_info->command));
 
       switch (cmd_info->command)
       {
-      case GLOBUS_GFS_OSG_CMD_SITE_USAGE:
-          std::cout << "Calling SITE USAGE\n";
-          globus_result_t result;
-          result = GLOBUS_SUCCESS;
-          globus_gridftp_server_finished_command(op, result, (char*)"250 SITE USAGE command called successfully.\r\n");
-          return;
-      default:
-          // Anything not explicitly OSG-centric is passed to the
-          // underlying module.
-          break;
+        case GLOBUS_GFS_CMD_SITE_GETPERMISSIONS:
+            logger.LogTrace("Calling SITE GETPERMISSIONS");
+            globus_result_t result;
+            result = GLOBUS_SUCCESS;
+            globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");
+            return;
+        default:
+            // Anything not explicitly plugin-centric is passed to the
+            // underlying module.
+            break;
       }
 
       original_command_function(op, cmd_info, user_arg);
@@ -246,124 +249,84 @@ extern "C"
       globus_gfs_transfer_info_t *        transfer_info,
       void *                              user_arg)
   {
-      std::cout << "Calling send function\n";
-      globus_l_gfs_permissions_plugin_handle_t *       permissions_plugin_handle;
-      GlobusGFSName(globus_l_gfs_permissions_plugin_send);
+    std::cout << "Calling send function\n";
+    globus_l_gfs_permissions_plugin_handle_t *       permissions_plugin_handle;
+    GlobusGFSName(globus_l_gfs_permissions_plugin_send);
 
-      permissions_plugin_handle = (globus_l_gfs_permissions_plugin_handle_t *) user_arg;
+    permissions_plugin_handle = (globus_l_gfs_permissions_plugin_handle_t *) user_arg;
 
-      globus_gridftp_server_finished_transfer(op, GLOBUS_SUCCESS);
+    globus_gridftp_server_finished_transfer(op, GLOBUS_SUCCESS);
   }
 
-  static
-  int
-  globus_l_gfs_permissions_plugin_activate(void);
+  static int globus_l_gfs_permissions_plugin_activate(void);
+  static int globus_l_gfs_permissions_plugin_deactivate(void);
 
-  static
-  int
-  globus_l_gfs_permissions_plugin_deactivate(void);
-
-  /*
-  *  no need to change this
-  */
-  static globus_gfs_storage_iface_t       globus_l_gfs_permissions_plugin_dsi_iface = 
-  {
-      GLOBUS_GFS_DSI_DESCRIPTOR_BLOCKING | GLOBUS_GFS_DSI_DESCRIPTOR_SENDER,
-      globus_l_gfs_permissions_plugin_start,
-      globus_l_gfs_permissions_plugin_destroy,
-      NULL, /* list */
-      NULL, //globus_l_gfs_permissions_plugin_send,
-      NULL, //globus_l_gfs_permissions_plugin_recv,
-      NULL, /* trev */
-      NULL, /* active */
-      NULL, /* passive */
-      NULL, /* data destroy */
-      globus_l_gfs_permissions_plugin_command, 
-      NULL, //globus_l_gfs_permissions_plugin_stat,
-      NULL,
-      NULL
-  };
-
-  /*
-  *  no need to change this
-  */
   GlobusExtensionDefineModule(globus_gridftp_server_permissions_plugin) =
   {
-      (char *)"globus_gridftp_server_permissions_plugin",
-      globus_l_gfs_permissions_plugin_activate,
-      globus_l_gfs_permissions_plugin_deactivate,
-      NULL,
-      NULL,
-      &local_version
+    (char *)"globus_gridftp_server_permissions_plugin",
+    globus_l_gfs_permissions_plugin_activate,
+    globus_l_gfs_permissions_plugin_deactivate,
+    NULL,
+    NULL,
+    &local_version
   };
 
-  /*
-  *  no need to change this
-  */
-  static
-  int
-  globus_l_gfs_permissions_plugin_activate(void)
+  static int globus_l_gfs_permissions_plugin_activate(void)
   {
-      std::cout << "Activating plugin\n";
-      globus_result_t result = GLOBUS_SUCCESS;
-      memset(&osg_dsi_iface, '\0', sizeof(globus_gfs_storage_iface_t));
-      char * dsi_name = getenv("OSG_EXTENSIONS_OVERRIDE_DSI");
-      dsi_name = dsi_name ? dsi_name : (char*)"file";
+    // start the logger, these settings should eventually be loaded from a config file
+    logger.Init("/usr/tmp/", "trace");
+    logger.LogInfo("Activating permissions plugin");
 
-      std::cout << "looking up file plugin\n";
-      void *new_dsi = (globus_gfs_storage_iface_t *) globus_extension_lookup(
-          &osg_dsi_handle, GLOBUS_GFS_DSI_REGISTRY, dsi_name);
+    globus_result_t result = GLOBUS_SUCCESS;
+    memset(&permissions_plugin_dsi_iface, '\0', sizeof(globus_gfs_storage_iface_t));
+    char * dsi_name;
+    dsi_name = (char*)"file";
 
-      std::cout << (new_dsi == NULL ? "true" : "false");
-      if (new_dsi == NULL)
-      {
-          // char module_name[1024];
-          // snprintf(module_name, 1024, "globus_gridftp_server_%s", dsi_name);
-          // module_name[1023] = '\0';
-          std::cout << "Trying to activate file dsi\n";
-          result = globus_extension_activate("globus_gridftp_server_file");
-          if (result != GLOBUS_SUCCESS)
-          {
-              std::cout << "Unable to activate file dsi\n";
-          }
-      }
-      new_dsi = (globus_gfs_storage_iface_t *) globus_extension_lookup(
-          &osg_dsi_handle, GLOBUS_GFS_DSI_REGISTRY, dsi_name);
+    logger.LogTrace("looking up file plugin");
+    void *new_dsi = (globus_gfs_storage_iface_t *) globus_extension_lookup(
+        &permissions_plugin_dsi_handle, GLOBUS_GFS_DSI_REGISTRY, dsi_name);
 
-      std::cout << (new_dsi == NULL ? "true" : "false");
-      std::cout << "copying file storage interface\n";
-      std::cout << "next step\n";
-      memcpy(&osg_dsi_iface, new_dsi, sizeof(globus_gfs_storage_iface_t));
+    if (new_dsi == NULL)
+    {
+        logger.LogTrace("Trying to activate file dsi");
+        result = globus_extension_activate("globus_gridftp_server_file");
+        if (result != GLOBUS_SUCCESS)
+        {
+            std::cout << "Unable to activate file dsi\n";
+            logger.LogError("Unable to activate file dsi");
+        }
+    }
+    new_dsi = (globus_gfs_storage_iface_t *) globus_extension_lookup(
+        &permissions_plugin_dsi_handle, GLOBUS_GFS_DSI_REGISTRY, dsi_name);
 
-      std::cout << "assigning original commands\n";
-      original_command_function = osg_dsi_iface.command_func;
-      original_init_function = osg_dsi_iface.init_func;
-      osg_dsi_iface.command_func = globus_l_gfs_permissions_plugin_command;
-      osg_dsi_iface.init_func = globus_l_gfs_permissions_plugin_start;
+    logger.LogTrace("copying file storage interface");
+    memcpy(&permissions_plugin_dsi_iface, new_dsi, sizeof(globus_gfs_storage_iface_t));
+
+    logger.LogTrace("storing copies of the original commands");
+    original_command_function = permissions_plugin_dsi_iface.command_func;
+    original_init_function = permissions_plugin_dsi_iface.init_func;
+    permissions_plugin_dsi_iface.command_func = globus_l_gfs_permissions_plugin_command;
+    permissions_plugin_dsi_iface.init_func = globus_l_gfs_permissions_plugin_start;
 
 
-      globus_extension_registry_add(
-          GLOBUS_GFS_DSI_REGISTRY,
-          (char *)"permissions_plugin",
-          GlobusExtensionMyModule(globus_gridftp_server_permissions_plugin),
-          &osg_dsi_iface);
+    globus_extension_registry_add(
+        GLOBUS_GFS_DSI_REGISTRY,
+        (char *)"permissions_plugin",
+        GlobusExtensionMyModule(globus_gridftp_server_permissions_plugin),
+        &permissions_plugin_dsi_iface);
 
-      return 0;
+    return 0;
   }
 
-  /*
-  *  no need to change this
-  */
-  static
-  int
-  globus_l_gfs_permissions_plugin_deactivate(void)
+  static int globus_l_gfs_permissions_plugin_deactivate(void)
   {
-      globus_extension_registry_remove(
-          GLOBUS_GFS_DSI_REGISTRY, (char *)"permissions_plugin");
+    logger.LogInfo("Deactivating permissions plugin");
+    globus_extension_registry_remove(
+        GLOBUS_GFS_DSI_REGISTRY, (char *)"permissions_plugin");
 
-      globus_extension_release(osg_dsi_handle);
+    globus_extension_release(permissions_plugin_dsi_handle);
 
-      return 0;
+    return 0;
   }
 
 }
