@@ -11,10 +11,7 @@ def set_up_system_test_environment(request):
     if (os.path.isdir(execution_space)):
         shutil.rmtree(execution_space)
 
-    # copy over the src
     os.makedirs(execution_space)
-    shutil.copytree('../../src', execution_space + '/src')
-    
     os.makedirs(execution_space + '/logs')
     os.makedirs(execution_space + '/testing_area/src')
     os.makedirs(execution_space + '/testing_area/staging')
