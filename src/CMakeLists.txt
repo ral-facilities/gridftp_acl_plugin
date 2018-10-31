@@ -48,15 +48,16 @@ set (GridftpACLPlugin_VERSION_MINOR 0)
 include_directories(${GLOBUS_CONFINC_PATH} ${GLOBUS_INC_PATH} )
 
 #include the application source files
-include_directories(framework framework/logger)
+include_directories(framework framework/logger application)
 
 file(GLOB_RECURSE framework_src "framework/**/*.h" "framework/**/*.cpp")
+file(GLOB_RECURSE application_src "application/*.h" "application/*.cpp")
 
 add_library (globus_gridftp_server_permissions_plugin SHARED
-  permissions_plugin.cpp ${framework_src})
+  permissions_plugin.cpp ${framework_src} ${application_src})
 
 #indicate the entry point for the executable
-add_executable (GridftpACLPlugin main.cpp ${framework_src})
+add_executable (GridftpACLPlugin main.cpp ${framework_src} ${application_src})
 
 # Indicate which libraries to include during the link process.
 target_link_libraries (GridftpACLPlugin spdlog)
