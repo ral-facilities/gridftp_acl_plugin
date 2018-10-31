@@ -11,6 +11,7 @@ host = 'localhost'
 port = 5000
 
 ftp = FTP()
+ftp.set_debuglevel(2)
 ftp.connect(host, port)
 ftp.login()
 
@@ -18,6 +19,8 @@ ftp.login()
 print('Send command to print working dir to gridFTP server...')
 print('Server returned: ')
 print('\t' + ftp.sendcmd('PWD'))
+
+print('\t' + ftp.sendcmd('SITE GETPERMISSIONS test'))
 
 # Send a custom registered command
 #ftp.sendcmd('SITE', args)
