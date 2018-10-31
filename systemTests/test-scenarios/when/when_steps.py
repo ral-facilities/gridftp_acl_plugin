@@ -1,9 +1,14 @@
 import subprocess
 import os
+import ftplib
+from ftplib import FTP
+
+from .gridftp_with_plugin import GridftpWithPlugin
 
 class WhenSteps:
     def __init__(self, context):
         self._context = context
+        self._gridftp_with_plugin = GridftpWithPlugin(context)
 
     def environment_is_stopped(self):
         self._context.stop_dms()
@@ -24,3 +29,12 @@ class WhenSteps:
         assert 1==0
         #fill out details - this should copy the test file created by given method "simple_test_file_is_setup" to /home/vagrant/systemTests/execution_space/testing_area/target/ using gridftp
         #possibly something like: os.system('globus-url-copy -v file:///home/${USER}/systemTests/execution_space/testing_area/src/testA.text ftp://localhost:5000/home/${USER}/systemTests/execution_space/testing_area/target/')
+
+    def get_permissions_called(self):
+        print('Send command to print working dir to gridFTP server...')
+        print('Server returned: ')
+        print('\t' + self._context.ftp_client.sendcmd('PWD'))
+        print('\t' + self._context.ftp_client.sendcmd('SITE GETPERMISSIONS test'))
+
+    def gridftp_plugin_server(self):
+        return self._gridftp_with_plugin

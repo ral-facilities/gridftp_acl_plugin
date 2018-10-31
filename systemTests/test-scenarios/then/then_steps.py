@@ -16,3 +16,6 @@ class ThenSteps:
 	def contents_of_copied_file_unchanged(self):
 		assert 1==0
 		#check that file copied across has the same contents as the input file
+
+	def logs_get_permissions(self):
+		assert 1==0

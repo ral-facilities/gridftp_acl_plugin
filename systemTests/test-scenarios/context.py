@@ -15,6 +15,9 @@ class SystemTestContext:
     def __init__(self):
         self.execution_folder_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + '/../execution_space/')
 
+        self.gridftp_process = None
+        self.ftp_client = None
+
         self.console_logger = ProcessLogger('console')
 
     def clean_up(self):
