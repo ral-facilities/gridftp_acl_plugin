@@ -2,13 +2,13 @@
 #define PermissionsReader_H
 
 #include <string>
-#include "IPermissionsReader.h"
+#include "IFileInfoProvider.h"
 using namespace std;
 
-class PermissionsReader: public IPermissionsReader
+class PermissionsReader
 {
   public:
-    struct stat GetPermissions(string fileLocation);
+    std::string GetPermissions(std::string fileLocation, IFileInfoProvider* fileInfoProvider);
 };
 
 #endif

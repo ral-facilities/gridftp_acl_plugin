@@ -7,7 +7,8 @@
 
  #include <sys/types.h>
  #include <fcntl.h>
- #include "./application/permissionsFormatter.h"
+ #include "./application/permissionsReader.h"
+ #include "./application/FileInfoProvider.h"
  using namespace std;
 
 
@@ -185,21 +186,33 @@ get_permissions(
             return;            
         }
 
-        std::string filePath = "default";
-        // for (int i = 0; i < argc; i++)
-        // {
-        //     cout << "args: " << argv[i] << endl;
-        //     cout << i << endl;
-        // }
-        filePath = argv[2];
-        std::string permissionsString = "File: " + filePath + "\n"; 
-        static PermissionsFormatter permissionsFormatter;
-        permissionsString = permissionsString + permissionsFormatter.ToString(filePath);
-        //char *cstr = &permissionsString[0u];
-        cout << permissionsString;
 
-        //globus_gridftp_server_finished_command(op, result, (char*)"Successful invocation of SITE GETPERMISSIONS.\r\n"); 
-        globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");       
+
+        std::string filePath = "default";
+
+        filePath = argv[2];
+
+        PermissionsReader permissionsReader;
+        FileInfoProvider fileInfoProvider;
+
+        try
+        {
+            std::string permissionsString = permissionsReader.GetPermissions(filePath, &fileInfoProvider);
+
+            char *cstr = &permissionsString[0u];
+            char final_output[1024];
+            snprintf(final_output, 1024, "250 PERMISSIONS: %s\r\n", cstr);
+            final_output[1023] = '\0';
+
+            //globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");
+            globus_gridftp_server_finished_command(op, result, final_output);
+        }
+        catch(std::runtime_error& e)
+        {
+            //char *cstr = &e.what()[0u];
+            result = GlobusGFSErrorGeneric("Server error");
+            globus_gridftp_server_finished_command(op, result, (char*)"550 Server usage query failed.\r\n");
+        }
     }
 
   /*************************************************************************

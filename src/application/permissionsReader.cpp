@@ -1,29 +1,29 @@
 #include "permissionsReader.h"
 #include <sys/stat.h>
 #include <iostream>
+#include "IFileInfoProvider.h"
 
-//std::string PermissionsReader::GetPermissions(std::string fileLocation)
-struct stat PermissionsReader::GetPermissions(std::string fileLocation) 
+std::string PermissionsReader::GetPermissions(std::string fileLocation, IFileInfoProvider* fileInfoProvider) 
 {
-    struct stat buf;
-    stat(fileLocation.c_str(), &buf);
-    return buf;
+    
+    struct stat buf = fileInfoProvider->GetPermissions(fileLocation);
+    cout << buf.st_mode << endl;
+    cout << buf.st_gid << endl;
+    cout << buf.st_uid << endl;
+    if ( buf.st_mode & S_IFREG )
+    {
+        std::string basicPermissions = "mode: " + std::to_string(buf.st_mode) + 
+                                    " groupID: " + std::to_string(buf.st_gid) +
+                                    " userID: " + std::to_string(buf.st_uid);
+        return basicPermissions;
+        // File found
+    }
+    // else if (buf.st_mode & S_IFDIR )
+    // {
+    //     // Directory found
+    // }
+    else
+    {
+        throw std::runtime_error("File not found");
+    }
 }
-
-//std::string PermissionsReader:
-    //cout << "\nGetting permissions for: " << fileLocation << endl;
-    // cout << buf.st_mode << endl;
-    // cout << buf.st_dev << endl;
-    // cout << buf.st_ino << endl;
-    // cout << buf.st_mode << endl;
-    // cout << buf. st_nlink << endl;
-    // cout << buf.st_uid << endl;
-    // cout << buf.st_gid << endl;
-    // cout << buf.st_blksize << endl;
-    // cout << buf.st_size << endl;
-    // cout << buf.st_blocks << endl;
-    // cout << buf.st_ctime << endl;
-    // cout << buf.st_atime << endl;
-    // cout << buf.st_mtime << endl;
-    // cout << "\nDone\n" << endl;
-    //int statchmod = buf.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);

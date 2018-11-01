@@ -1,0 +1,13 @@
+#ifndef MOCK_FileInfoProvider_H
+#define MOCK_FileInfoProvider_H
+
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "../../application/IFileInfoProvider.h"
+
+class MockFileInfoProvider : public IFileInfoProvider {
+ public:
+   MOCK_CONST_METHOD1(GetPermissions, struct stat(std::string fileLocation));
+};
+
+#endif
