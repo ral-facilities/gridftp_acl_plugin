@@ -29,11 +29,7 @@ class SystemTestContext:
     def shut_down_gridftp(self):
       if self.gridftp_process is not None:
         gridftp_processes = [p.info for p in psutil.process_iter(attrs=['pid', 'name']) if 'globus-gridftp-server' in p.info['name']]
-        print(gridftp_processes)
-        print(len(gridftp_processes))
         for gridftp_proc in gridftp_processes:
-          print(gridftp_proc)
-          print(gridftp_proc['pid'])
           os.kill(gridftp_proc['pid'], signal.SIGTERM)
 
         self.gridftp_process = None
