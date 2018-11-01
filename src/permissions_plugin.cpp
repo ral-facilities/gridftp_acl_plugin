@@ -274,7 +274,7 @@ extern "C"
   static int globus_l_gfs_permissions_plugin_activate(void)
   {
     // start the logger, these settings should eventually be loaded from a config file
-    logger.Init("/usr/tmp/", "trace");
+    logger.Init("/home/vagrant/systemTests/execution_space/logs/", "trace");
     logger.LogInfo("Activating permissions plugin");
 
     globus_result_t result = GLOBUS_SUCCESS;
