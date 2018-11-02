@@ -11,6 +11,7 @@ class FileInfoProvider: public IFileInfoProvider
 {
   public:
     struct stat GetPermissions(std::string fileLocation) const override;
+    bool Exists(std::string fileLocation) const override;
 };
 
 #endif

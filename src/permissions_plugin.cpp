@@ -186,7 +186,7 @@ get_permissions(
             return;            
         }
 
-        std::string filePath = "default";
+        std::string filePath = "";
         filePath = argv[2];
 
         PermissionsReader permissionsReader;
@@ -204,6 +204,7 @@ get_permissions(
         }
         catch(std::runtime_error& e)
         {
+            //cout << e.what() << endl;
             result = GlobusGFSErrorGeneric("Failed to get file permissions");
             globus_gridftp_server_finished_command(op, result, (char*)"550 Server usage query failed.\r\n");
         }
