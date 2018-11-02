@@ -11,6 +11,7 @@ class IFileInfoProvider
     virtual ~IFileInfoProvider() {}
     virtual struct stat GetPermissions(std::string fileLocation) const = 0;
     virtual bool Exists(std::string fileLocation) const = 0;
+    virtual void SetPermissions(std::string fileLocation, std::string permissions) const = 0;
 };
 
 #endif

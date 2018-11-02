@@ -35,7 +35,7 @@ TEST_F(PermissionsReaderTests, CheckAssertion)
     PermissionsReader permissionsReader;
     ASSERT_EQ(permissionsReader.GetPermissions(fileName, &mockFileInfoProvider), "mode: 32768 groupID: 1000 userID: 1000");
 
-    buf.st_mode = S_IFDIR;  // directory, 16384 equiv 400000 octal, must update mock each time st_mode is changed 
+    buf.st_mode = S_IFDIR;  // directory, 16384 equiv 40000 octal, must update mock each time st_mode is changed 
     EXPECT_CALL(mockFileInfoProvider, GetPermissions("file123.txt")).WillRepeatedly(Return(buf));
     ASSERT_EQ(permissionsReader.GetPermissions(fileName, &mockFileInfoProvider), "mode: 16384 groupID: 1000 userID: 1000");
 

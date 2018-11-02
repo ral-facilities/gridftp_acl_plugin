@@ -8,6 +8,7 @@
  #include <sys/types.h>
  #include <fcntl.h>
  #include "./application/permissionsReader.h"
+ #include "./application/permissionsSetter.h"
  #include "./application/FileInfoProvider.h"
  using namespace std;
 
@@ -44,6 +45,7 @@ extern "C"
 
   enum {
     GLOBUS_GFS_CMD_SITE_GETPERMISSIONS = GLOBUS_GFS_MIN_CUSTOM_CMD,
+    GLOBUS_GFS_CMD_SITE_SETPERMISSIONS = GLOBUS_GFS_MIN_CUSTOM_CMD+1
   };
 
 
@@ -74,7 +76,7 @@ extern "C"
       // globus_gfs_finished_info_t          finished_info;
       GlobusGFSName(globus_l_gfs_permissions_plugin_start);
 
-      logger.LogTrace("starting permissions plugin session");
+      logger.LogTrace("starting GET permissions plugin session");
 
       globus_result_t result = globus_gridftp_server_add_command(op, "SITE GETPERMISSIONS",
                                   GLOBUS_GFS_CMD_SITE_GETPERMISSIONS,
@@ -88,6 +90,28 @@ extern "C"
       if (result != GLOBUS_SUCCESS)
       {
           std::cout << "Failed to add custom 'SITE GETPERMISSIONS' command\n";
+          globus_gridftp_server_finished_session_start(op,
+                                                  result,
+                                                  NULL,
+                                                  NULL,
+                                                  NULL);
+          return;
+      }
+
+      logger.LogTrace("starting SET permissions plugin session");
+
+      result = globus_gridftp_server_add_command(op, "SITE SETPERMISSIONS",
+                                  GLOBUS_GFS_CMD_SITE_SETPERMISSIONS,
+                                  3,
+                                  4,
+                                  "SITE SETPERMISSIONS <sp> $location: Set permission information for a location.",
+                                  GLOBUS_TRUE,
+                                  GFS_ACL_ACTION_LOOKUP);
+
+      logger.LogTrace("registered SITE SETPERMISSIONS command");
+      if (result != GLOBUS_SUCCESS)
+      {
+          std::cout << "Failed to add custom 'SITE SETPERMISSIONS' command\n";
           globus_gridftp_server_finished_session_start(op,
                                                   result,
                                                   NULL,
@@ -210,6 +234,59 @@ get_permissions(
         }
     }
 
+  static
+  void
+  set_permissions(
+    globus_gfs_operation_t op,
+    globus_gfs_command_info_t *cmd_info)      
+  {
+      GlobusGFSName(set_permissions);
+
+      int argc = 0;
+      char **argv;
+
+      globus_result_t result = globus_gridftp_server_query_op_info(
+            op,
+            cmd_info->op_info,
+            GLOBUS_GFS_OP_INFO_CMD_ARGS,
+            &argv,
+            &argc
+        );
+
+      if (result != GLOBUS_SUCCESS)
+        {
+            result = GlobusGFSErrorGeneric("Incorrect invocation of SITE SETPERMISSIONS command");
+            globus_gridftp_server_finished_command(op, result, (char*)"550 Incorrect invocation of SITE SETPERMISSIONS.\r\n");
+            return;            
+        }
+
+      std::string filePath;
+      filePath = argv[2];     
+
+      PermissionsSetter permissionsSetter;
+      FileInfoProvider fileInfoProvider;
+
+      try
+      {
+            std::string permissions = "group, user, mode";
+
+            permissionsSetter.SetPermissions(filePath, permissions, &fileInfoProvider);
+
+            // char *cstr = &permissionsString[0u];
+            char final_output[1024];
+            // snprintf(final_output, 1024, "250 PERMISSIONS: %s\r\n", cstr);
+            snprintf(final_output, 1024, "250 PERMISSIONS: test test\r\n");
+            final_output[1023] = '\0';
+            globus_gridftp_server_finished_command(op, result, final_output);
+        }
+        catch(std::runtime_error& e)
+        {
+            //cout << e.what() << endl;
+            result = GlobusGFSErrorGeneric("Failed to set file permissions");
+            globus_gridftp_server_finished_command(op, result, (char*)"550 Server usage query failed.\r\n");
+        }
+  }
+
   /*************************************************************************
    *  command
    *  -------
@@ -232,29 +309,35 @@ get_permissions(
   static
   void
   globus_l_gfs_permissions_plugin_command(
-      globus_gfs_operation_t              op,
-      globus_gfs_command_info_t *         cmd_info,
-      void *                              user_arg)
-  {
-      logger.LogTrace("Calling command function with command " + std::to_string(cmd_info->command));
+    globus_gfs_operation_t              op,
+    globus_gfs_command_info_t *         cmd_info,
+    void *                              user_arg)
+{
+    logger.LogTrace("Calling command function with command " + std::to_string(cmd_info->command));
 
-      switch (cmd_info->command)
-      {
-        case GLOBUS_GFS_CMD_SITE_GETPERMISSIONS:
-            logger.LogTrace("Calling SITE GETPERMISSIONS");
-            // globus_result_t result;
-            // result = GLOBUS_SUCCESS;
-            // globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");
-            get_permissions(op, cmd_info);
-            return;
-        default:
-            // Anything not explicitly plugin-centric is passed to the
-            // underlying module.
-            break;
-      }
+    globus_result_t result;
+    switch (cmd_info->command)
+    {
+    case GLOBUS_GFS_CMD_SITE_GETPERMISSIONS:
+        logger.LogTrace("Calling SITE GETPERMISSIONS");
+        // result = GLOBUS_SUCCESS;
+        // globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");
+        get_permissions(op, cmd_info);
+        return;
+    case GLOBUS_GFS_CMD_SITE_SETPERMISSIONS:
+        logger.LogTrace("Calling SITE SETPERMISSIONS");
+        // result = GLOBUS_SUCCESS;
+        // globus_gridftp_server_finished_command(op, result, (char*)"250 SITE SETPERMISSIONS command called successfully.\r\n");
+        set_permissions(op, cmd_info);
+        return;
+    default:
+        // Anything not explicitly plugin-centric is passed to the
+        // underlying module.
+        break;
+    }
 
-      original_command_function(op, cmd_info, user_arg);
-  }
+    original_command_function(op, cmd_info, user_arg);
+}
 
   /*************************************************************************
    *  recv

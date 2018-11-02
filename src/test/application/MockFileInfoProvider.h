@@ -9,6 +9,7 @@ class MockFileInfoProvider : public IFileInfoProvider {
  public:
    MOCK_CONST_METHOD1(GetPermissions, struct stat(std::string fileLocation));
    MOCK_CONST_METHOD1(Exists, bool (std::string fileLocation));
+   MOCK_CONST_METHOD2(SetPermissions, void (std::string fileLocation, std::string permissions));
 };
 
 #endif
