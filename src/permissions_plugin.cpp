@@ -186,10 +186,7 @@ get_permissions(
             return;            
         }
 
-
-
         std::string filePath = "default";
-
         filePath = argv[2];
 
         PermissionsReader permissionsReader;
@@ -203,14 +200,11 @@ get_permissions(
             char final_output[1024];
             snprintf(final_output, 1024, "250 PERMISSIONS: %s\r\n", cstr);
             final_output[1023] = '\0';
-
-            //globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");
             globus_gridftp_server_finished_command(op, result, final_output);
         }
         catch(std::runtime_error& e)
         {
-            //char *cstr = &e.what()[0u];
-            result = GlobusGFSErrorGeneric("Server error");
+            result = GlobusGFSErrorGeneric("Failed to get file permissions");
             globus_gridftp_server_finished_command(op, result, (char*)"550 Server usage query failed.\r\n");
         }
     }

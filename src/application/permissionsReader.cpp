@@ -7,23 +7,16 @@ std::string PermissionsReader::GetPermissions(std::string fileLocation, IFileInf
 {
     
     struct stat buf = fileInfoProvider->GetPermissions(fileLocation);
-    cout << buf.st_mode << endl;
-    cout << buf.st_gid << endl;
-    cout << buf.st_uid << endl;
-    if ( buf.st_mode & S_IFREG )
+
+    if ( buf.st_mode != 0 )
     {
         std::string basicPermissions = "mode: " + std::to_string(buf.st_mode) + 
                                     " groupID: " + std::to_string(buf.st_gid) +
                                     " userID: " + std::to_string(buf.st_uid);
         return basicPermissions;
-        // File found
     }
-    // else if (buf.st_mode & S_IFDIR )
-    // {
-    //     // Directory found
-    // }
     else
     {
-        throw std::runtime_error("File not found");
+        throw std::runtime_error("Permissions not found");
     }
 }
