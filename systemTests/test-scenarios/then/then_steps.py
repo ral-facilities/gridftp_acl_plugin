@@ -17,4 +17,9 @@ class ThenSteps:
 
   def logs_get_permissions(self):
     self.gridftp_plugin_log.contains("Calling SITE GETPERMISSIONS")
-    self.console_error.contains("250 SITE GETPERMISSIONS command called successfully")
+    self.console_error.contains('257 "/home/vagrant" is current directory.')
+    self.console_error.contains("250 PERMISSIONS: mode:")
+
+  def logs_get_permissions_directory(self):
+    self.gridftp_plugin_log.contains("Calling SITE GETPERMISSIONS")
+    self.console_error.contains("250 PERMISSIONS: mode: 16895 groupID: 1000 userID: 1000")

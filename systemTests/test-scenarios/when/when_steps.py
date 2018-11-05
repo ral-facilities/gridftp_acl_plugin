@@ -44,5 +44,8 @@ class WhenSteps:
         #print('\t' + self._context.ftp_client.sendcmd('PWD'))
         #print('\t' + self._context.ftp_client.sendcmd('SITE GETPERMISSIONS test'))
 
+    def get_permissions_called_for_directory(self):
+        print('\t' + self._context.ftp_client.sendcmd('SITE GETPERMISSIONS /home/vagrant/src/test'))
+
     def gridftp_plugin_server(self):
         return self._gridftp_with_plugin
