@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include <iostream>
 #include "./framework/logger/logger.h"
+#include <stdexcept>
+#include <string>
+#include <sys/stat.h>
+
+ #include <sys/types.h>
+ #include <fcntl.h>
+ #include "./application/permissionsReader.h"
+ #include "./application/FileInfoProvider.h"
+ using namespace std;
+
 
 extern "C"
 {
@@ -150,6 +160,56 @@ extern "C"
           op, GLOBUS_SUCCESS, stat_array, stat_count);
   }
 
+static
+void
+get_permissions(
+    globus_gfs_operation_t op,
+    globus_gfs_command_info_t *cmd_info)
+    {
+        GlobusGFSName(get_permissions);
+
+        int argc = 0;
+        char **argv;
+
+        globus_result_t result = globus_gridftp_server_query_op_info(
+            op,
+            cmd_info->op_info,
+            GLOBUS_GFS_OP_INFO_CMD_ARGS,
+            &argv,
+            &argc
+            );
+        
+        if (result != GLOBUS_SUCCESS)
+        {
+            result = GlobusGFSErrorGeneric("Incorrect invocation of SITE GETPERMISSIONS command");
+            globus_gridftp_server_finished_command(op, result, (char*)"550 Incorrect invocation of SITE GETPERMISSIONS.\r\n");
+            return;            
+        }
+
+        std::string filePath = "";
+        filePath = argv[2];
+
+        PermissionsReader permissionsReader;
+        FileInfoProvider fileInfoProvider;
+
+        try
+        {
+            std::string permissionsString = permissionsReader.GetPermissions(filePath, &fileInfoProvider);
+
+            char *cstr = &permissionsString[0u];
+            char final_output[1024];
+            snprintf(final_output, 1024, "250 PERMISSIONS: %s\r\n", cstr);
+            final_output[1023] = '\0';
+            globus_gridftp_server_finished_command(op, result, final_output);
+        }
+        catch(std::runtime_error& e)
+        {
+            //cout << e.what() << endl;
+            result = GlobusGFSErrorGeneric("Failed to get file permissions");
+            globus_gridftp_server_finished_command(op, result, (char*)"550 Server usage query failed.\r\n");
+        }
+    }
+
   /*************************************************************************
    *  command
    *  -------
@@ -182,9 +242,10 @@ extern "C"
       {
         case GLOBUS_GFS_CMD_SITE_GETPERMISSIONS:
             logger.LogTrace("Calling SITE GETPERMISSIONS");
-            globus_result_t result;
-            result = GLOBUS_SUCCESS;
-            globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");
+            // globus_result_t result;
+            // result = GLOBUS_SUCCESS;
+            // globus_gridftp_server_finished_command(op, result, (char*)"250 SITE GETPERMISSIONS command called successfully.\r\n");
+            get_permissions(op, cmd_info);
             return;
         default:
             // Anything not explicitly plugin-centric is passed to the
