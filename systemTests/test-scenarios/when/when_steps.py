@@ -36,5 +36,13 @@ class WhenSteps:
         print('\t' + self._context.ftp_client.sendcmd('PWD'))
         print('\t' + self._context.ftp_client.sendcmd('SITE GETPERMISSIONS test'))
 
+    def get_permissions_called_for_file(self):
+        assert 1==0
+        #we will use the command to get permissions for a file instead in this method
+        #print('Send command to print working dir to gridFTP server...')
+        #print('Server returned: ')
+        #print('\t' + self._context.ftp_client.sendcmd('PWD'))
+        #print('\t' + self._context.ftp_client.sendcmd('SITE GETPERMISSIONS test'))
+
     def gridftp_plugin_server(self):
         return self._gridftp_with_plugin
