@@ -4,6 +4,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sstream>
+#include <regex>
+#include <string>
 
 struct stat FileInfoProvider::GetPermissions(std::string fileLocation) const
 {
@@ -23,8 +26,7 @@ void FileInfoProvider::SetMode(std::string fileLocation, int mode) const
     cout << "setting file permissions" << "\n";
     cout << "File is: " << fileLocation << "\n";
     cout << "Mode is: " << mode << "\n";
-    int status;
-    // struct stat buffer;
+    // int status;
     // int chmod(const char *path, mode_t mode);
     // chmod((char*)"/tmp/test.txt", 100777);
     // chmod((char*)"/tmp/test.txt", S_IRWXU);
@@ -32,7 +34,6 @@ void FileInfoProvider::SetMode(std::string fileLocation, int mode) const
     chmod((char*)"/tmp/test.txt", mode);
     chmod((char*)"/home/vagrant/TestDir/test.txt", mode);
     // status = stat((char*)"/tmp/test.txt", &buffer);
-    // cout << "Mode set to: " << buffer.st_mode << endl;
 
 }
 
@@ -40,23 +41,8 @@ void FileInfoProvider::SetUserAndGroupID(std::string fileLocation, int userID, i
 {
     cout << "changing ownership and group of test file" << endl;
     cout << "uid before: " << getuid << endl;
-    //setuid(0);
-    //cout << setuid(0);
-    //cout << "uid after: " << getuid << endl;
-
     cout << userID << " and group: " << groupID << endl;
-    //THIS IS THE BIT YOU NEED!
-    chown((char*)"/tmp/test.txt", 1234, 1234);
-    
-    // cout << "Tmp dir: " << chown((char*)"/tmp/test.txt", 1234, 1234);
-    // struct stat buf;
-    // stat((char*)"/home/vagrant/src/test.txt", &buf);
-    // cout << buf.st_gid << endl;
-    // cout << buf.st_uid << endl;
-    // cout << chown((char*)"/home/vagrant/src/test.txt", 1234, 1234) << endl;
-    // cout << 
-    // system("echo vagrant | sudo chown 1234:1234 /home/vagrant/TestDir/test.txt");
-    // stat((char*)"/home/vagrant/TestDir/test.txt", &buf);
-    // cout << buf.st_gid << endl;
-    // cout << buf.st_uid << endl;
+    char * tab2 = new char [fileLocation.length()+1];
+    strcpy (tab2, fileLocation.c_str());
+    chown((char*)tab2, userID, groupID);
 }

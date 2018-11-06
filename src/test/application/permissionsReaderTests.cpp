@@ -10,7 +10,7 @@ using ::testing::_;
 class PermissionsReaderTests : public ::testing::Test
 {
     std::string fileName = "file123.txt";
-    MockFileInfoProvider mockFileInfoProvider;
+    // MockFileInfoProvider mockFileInfoProvider;
 
     virtual void setup() {}
 

@@ -262,14 +262,16 @@ get_permissions(
 
       std::string filePath;
       filePath = argv[2];     
+      std::string permissions;
+      permissions = argv[3];
 
       PermissionsSetter permissionsSetter;
       FileInfoProvider fileInfoProvider;
 
       try
       {
-            std::string permissions = "mode: 16895 groupID: 1000 userID: 1000";
-
+            //std::string permissions = "mode: 16895 groupID: 1000 userID: 1000";
+           // cout << permissions << endl;
             permissionsSetter.SetPermissions(filePath, permissions, &fileInfoProvider);
 
             // char *cstr = &permissionsString[0u];
