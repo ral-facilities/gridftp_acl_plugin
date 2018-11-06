@@ -11,9 +11,9 @@ std::string PermissionsReader::GetPermissions(std::string fileLocation, IFileInf
     {
         struct stat buffer;
         struct stat buf = fileInfoProvider->GetPermissions(fileLocation);
-        std::string basicPermissions = "mode: " + std::to_string(buf.st_mode) + 
-                                    " groupID: " + std::to_string(buf.st_gid) +
-                                    " userID: " + std::to_string(buf.st_uid);
+        std::string basicPermissions = "mode=" + std::to_string(buf.st_mode) + 
+                                    ";groupID=" + std::to_string(buf.st_gid) +
+                                    ";userID=" + std::to_string(buf.st_uid);
         return basicPermissions;
     }
     else

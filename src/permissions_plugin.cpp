@@ -268,7 +268,7 @@ get_permissions(
 
       try
       {
-            std::string permissions = "group, user, mode";
+            std::string permissions = "mode: 16895 groupID: 1000 userID: 1000";
 
             permissionsSetter.SetPermissions(filePath, permissions, &fileInfoProvider);
 
