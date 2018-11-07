@@ -260,6 +260,14 @@ get_permissions(
             return;            
         }
 
+      cout << "ARGC " << argc << endl;
+      if (argc != 4)
+      {
+        result = GlobusGFSErrorGeneric("Incorrect number of arguments to SITE SETPERMISSIONS command");
+        globus_gridftp_server_finished_command(op, result, (char*)"550 Incorrect number of arguments to SITE SETPERMISSIONS command.\r\n");
+        return;          
+      }
+
       std::string filePath;
       filePath = argv[2];     
       std::string permissions;
@@ -277,7 +285,7 @@ get_permissions(
             // char *cstr = &permissionsString[0u];
             char final_output[1024];
             // snprintf(final_output, 1024, "250 PERMISSIONS: %s\r\n", cstr);
-            snprintf(final_output, 1024, "250 PERMISSIONS: test test\r\n");
+            snprintf(final_output, 1024, "250 SETPERMISSIONS: Completed successfully\r\n");
             final_output[1023] = '\0';
             globus_gridftp_server_finished_command(op, result, final_output);
         }

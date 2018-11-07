@@ -1,12 +1,8 @@
 #include "FileInfoProvider.h"
-#include <stdexcept>
-#include <iostream>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sstream>
-#include <regex>
 #include <string>
+#include "Utils.h"
 
 struct stat FileInfoProvider::GetPermissions(std::string fileLocation) const
 {
@@ -21,28 +17,20 @@ bool FileInfoProvider::Exists(std::string fileLocation) const
     return (stat(fileLocation.c_str(), &buf) == 0);
 }
 
-void FileInfoProvider::SetMode(std::string fileLocation, int mode) const
+bool FileInfoProvider::SetMode(std::string fileLocation, int mode) const
 {
-    cout << "setting file permissions" << "\n";
-    cout << "File is: " << fileLocation << "\n";
-    cout << "Mode is: " << mode << "\n";
-    // int status;
     // int chmod(const char *path, mode_t mode);
     // chmod((char*)"/tmp/test.txt", 100777);
     // chmod((char*)"/tmp/test.txt", S_IRWXU);
     // chmod((char*)"/tmp/test.txt", 16895);
-    chmod((char*)"/tmp/test.txt", mode);
-    chmod((char*)"/home/vagrant/TestDir/test.txt", mode);
-    // status = stat((char*)"/tmp/test.txt", &buffer);
-
+    Utils utils;
+    char * fileCharArray = utils.StringToCharArray(fileLocation);
+    return (chmod(fileCharArray, mode) == 0);
 }
 
-void FileInfoProvider::SetUserAndGroupID(std::string fileLocation, int userID, int groupID) const
+bool FileInfoProvider::SetUserAndGroupID(std::string fileLocation, int userID, int groupID) const
 {
-    cout << "changing ownership and group of test file" << endl;
-    cout << "uid before: " << getuid << endl;
-    cout << userID << " and group: " << groupID << endl;
-    char * tab2 = new char [fileLocation.length()+1];
-    strcpy (tab2, fileLocation.c_str());
-    chown((char*)tab2, userID, groupID);
+    Utils utils;
+    char * fileCharArray = utils.StringToCharArray(fileLocation);
+    return (chown(fileCharArray, userID, groupID) == 0);
 }

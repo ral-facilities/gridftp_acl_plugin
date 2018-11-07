@@ -3,7 +3,6 @@
 
 #include <string>
 #include "IFileInfoProvider.h"
-using namespace std;
 
 class PermissionsSetter
 {
