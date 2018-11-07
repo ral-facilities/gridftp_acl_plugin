@@ -1,4 +1,4 @@
-#include "permissionsReader.h"
+#include "PermissionsReader.h"
 #include <sys/stat.h>
 #include <iostream>
 #include <stdexcept>
@@ -12,8 +12,8 @@ std::string PermissionsReader::GetPermissions(std::string fileLocation, IFileInf
         struct stat buffer;
         struct stat buf = fileInfoProvider->GetPermissions(fileLocation);
         std::string basicPermissions = "mode=" + std::to_string(buf.st_mode) + 
-                                    ";groupID=" + std::to_string(buf.st_gid) +
-                                    ";userID=" + std::to_string(buf.st_uid);
+                                    ";userID=" + std::to_string(buf.st_uid) +
+                                    ";groupID=" + std::to_string(buf.st_gid);
         return basicPermissions;
     }
     else
