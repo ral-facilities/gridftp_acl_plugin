@@ -7,9 +7,10 @@
 
  #include <sys/types.h>
  #include <fcntl.h>
- #include "./application/permissionsReader.h"
- #include "./application/permissionsSetter.h"
+ #include "./application/PermissionsReader.h"
+ #include "./application/PermissionsSetter.h"
  #include "./application/FileInfoProvider.h"
+ #include "./application/Utils.h"
  using namespace std;
 
 
@@ -260,7 +261,6 @@ get_permissions(
             return;            
         }
 
-      cout << "ARGC " << argc << endl;
       if (argc != 4)
       {
         result = GlobusGFSErrorGeneric("Incorrect number of arguments to SITE SETPERMISSIONS command");
@@ -275,14 +275,13 @@ get_permissions(
 
       PermissionsSetter permissionsSetter;
       FileInfoProvider fileInfoProvider;
+      Utils utils;
 
       try
       {
             //std::string permissions = "mode: 16895 groupID: 1000 userID: 1000";
-           // cout << permissions << endl;
-            permissionsSetter.SetPermissions(filePath, permissions, &fileInfoProvider);
+            permissionsSetter.SetPermissions(filePath, permissions, &utils, &fileInfoProvider);
 
-            // char *cstr = &permissionsString[0u];
             char final_output[1024];
             // snprintf(final_output, 1024, "250 PERMISSIONS: %s\r\n", cstr);
             snprintf(final_output, 1024, "250 SETPERMISSIONS: Completed successfully\r\n");

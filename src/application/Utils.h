@@ -3,13 +3,14 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "IUtils.h"
 
-class Utils
+class Utils: public IUtils
 {
   public:
-    char* StringToCharArray(std::string input);
-    std::vector<std::string> StringSplitter(std::string input, std::string delimiter1, std::string delimiter2);
-    std::map<std::string, std::string> TokensToMap(std::vector<std::string> tokens);
+    std::map<std::string, std::string> SettingsStringToMap(std::string inputSettings) const override;
+  private:
+    std::vector<std::string> StringSplitter(std::string input, char delimiter) const;
 };
 
 #endif

@@ -1,43 +1,32 @@
 #include <Utils.h>
 #include <regex>
 
-char* Utils::StringToCharArray(std::string input)
+std::vector<std::string> Utils::StringSplitter(std::string permissionsStr, char delimiter) const
 {
-    char * charArray = new char [input.length()+1];
-    strcpy (charArray, input.c_str());
-    return charArray;
-}
-
-std::vector<std::string> Utils::StringSplitter(std::string permissionsStr, std::string delimiter1, std::string delimiter2)
-{
-    char delim1 = Utils::StringToCharArray(delimiter1)[0];
-    char* delim2 = Utils::StringToCharArray(delimiter2);
     std::vector<std::string> tokens;
     std::string token;
     std::istringstream tokenStream(permissionsStr);
-    while (std::getline(tokenStream, token, delim1))
+    while (std::getline(tokenStream, token, delimiter))
     {
-        char * tab2 = new char [token.length()+1];
-        strcpy (tab2, token.c_str());
-        char * pch;
-        pch = strtok(tab2, delim2);
-        while (pch != NULL)
-        {
-            tokens.push_back(pch);
-            pch = strtok (NULL, delim2);
-        }
+        tokens.push_back(token);
     }
     return tokens;
 }
 
-std::map<std::string, std::string> Utils::TokensToMap(std::vector<std::string> tokens)
+std::map<std::string, std::string> Utils::SettingsStringToMap(std::string inputSettings) const
 {
-    std::map<std::string, std::string> tokenMap;
-    for (int i = 0; i < tokens.size()-1; i++)
-    {
+    // Split on ; to get key-value pairs
+    std::vector<std::string> tokens;
+    tokens = StringSplitter(inputSettings, ';');
 
-        tokenMap[tokens[i]] = tokens[i+1];
-       i++;
+    // Loop over key-value pairs and split on =
+    std::map<std::string, std::string> tokenMap;
+    for (int i = 0; i < tokens.size(); i++)
+    {
+        std::vector<std::string> kvp;
+        kvp = StringSplitter(tokens[i], '=');
+        // put key-value pairs into map
+        tokenMap[kvp[0]] = kvp[1];
     }
     return tokenMap;
 }

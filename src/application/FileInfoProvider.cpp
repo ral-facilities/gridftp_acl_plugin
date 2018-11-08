@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string>
-#include "Utils.h"
+#include "IUtils.h"
 
 struct stat FileInfoProvider::GetPermissions(std::string fileLocation) const
 {
@@ -19,18 +19,10 @@ bool FileInfoProvider::Exists(std::string fileLocation) const
 
 bool FileInfoProvider::SetMode(std::string fileLocation, int mode) const
 {
-    // int chmod(const char *path, mode_t mode);
-    // chmod((char*)"/tmp/test.txt", 100777);
-    // chmod((char*)"/tmp/test.txt", S_IRWXU);
-    // chmod((char*)"/tmp/test.txt", 16895);
-    Utils utils;
-    char * fileCharArray = utils.StringToCharArray(fileLocation);
-    return (chmod(fileCharArray, mode) == 0);
+    return (chmod(fileLocation.c_str(), mode) == 0);
 }
 
 bool FileInfoProvider::SetUserAndGroupID(std::string fileLocation, int userID, int groupID) const
 {
-    Utils utils;
-    char * fileCharArray = utils.StringToCharArray(fileLocation);
-    return (chown(fileCharArray, userID, groupID) == 0);
+    return (chown(fileLocation.c_str(), userID, groupID) == 0);
 }

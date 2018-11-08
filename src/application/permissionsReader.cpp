@@ -1,6 +1,5 @@
 #include "PermissionsReader.h"
 #include <sys/stat.h>
-#include <iostream>
 #include <stdexcept>
 #include "IFileInfoProvider.h"
 
