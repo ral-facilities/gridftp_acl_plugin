@@ -12,6 +12,8 @@ class FileInfoProvider: public IFileInfoProvider
   public:
     struct stat GetPermissions(std::string fileLocation) const override;
     bool Exists(std::string fileLocation) const override;
+    bool SetMode(std::string fileLocation, int mode) const override;
+    bool SetUserAndGroupID(std::string fileLocation, int userID, int groupID) const override;
 };
 
 #endif
