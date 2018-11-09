@@ -35,4 +35,5 @@ void Logger::LogTrace(string message) const {
 
 void Logger::logMessage(const std::string& message, const spdlog::level::level_enum level) const {
     logger->log(level, message);
+    logger->flush();
 }
